@@ -1,4 +1,4 @@
-package ru.ifmo.jb.hw.sdcli.other
+package ru.ifmo.jb.hw.sdcli.programs
 
 interface Program {
     fun execute()
