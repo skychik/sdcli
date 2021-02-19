@@ -9,25 +9,12 @@ class Wc(private val filePath: Token) : Program {
             val inputStream = File(filePath).inputStream()
             val str = inputStream.bufferedReader().use { it.readText() }
 
-            var lines = (str.split("\n").size - 1).toString()
+            val lines = (str.split("\n").size - 1)//.toString()
+            val words = (str.replace("\n", " ").split("\\s+".toRegex()).size - 1)//.toString()
+            val bytes = File(filePath).readBytes().size//.toString()
 
-            var words = (str
-                .replace("\n", " ")
-                .split("\\s+".toRegex()).size - 1).toString()
-
-            var bytes = File(filePath).readBytes().size.toString()
-
-            for (i in 1..(8 - lines.length)) {
-                lines = " $lines"
-            }
-            for (i in 1..(8 - words.length)) {
-                words = " $words"
-            }
-            for (i in 1..(8 - bytes.length)) {
-                bytes = " $bytes"
-            }
-
-            println("$lines$words$bytes $filePath")
+            val format = {num: Int -> "%7d".format(num)}
+            println(" ${format(lines)} ${format(words)} ${format(bytes)} $filePath")
         } catch (e: FileNotFoundException) {
             println("cat: $filePath: open: No such file or directory")
         }
