@@ -1,7 +1,13 @@
 package ru.ifmo.jb.hw.sdcli.programs
 
-class Exit : Program {
+import java.io.PrintStream
+
+/**
+ * Exit analogue.
+ */
+class Exit : Program() {
     override fun execute() {
-        print("exit")
+        PrintStream(output).print("exit")
+        close()
     }
 }

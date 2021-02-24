@@ -4,14 +4,21 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
 
-class Cat(private val filePath: Token) : Program {
+/**
+ * Cat analogue
+ */
+class Cat : Program() {
+
     override fun execute() {
-        try {
-            val inputStream: InputStream = File(filePath).inputStream()
+        if (args.isEmpty()) {
+            output.write(input.readAllBytes())
+        } else try {
+            val inputStream: InputStream = File(args[0]).inputStream()
             val inputString = inputStream.bufferedReader().use { it.readText() }
-            println(inputString)
+            print(inputString)
         } catch (e: FileNotFoundException) {
-            println("cat: $filePath: No such file or directory")
+            print("cat: ${args[0]}: No such file or directory")
         }
+        close()
     }
 }

@@ -1,122 +1,85 @@
 @file:JvmName("Main")
 package ru.ifmo.jb.hw.sdcli
 
-import ru.ifmo.jb.hw.sdcli.programs.*
+import ru.ifmo.jb.hw.sdcli.programs.Exit
+import ru.ifmo.jb.hw.sdcli.programs.NoneProgram
+import ru.ifmo.jb.hw.sdcli.programs.Program
+import ru.ifmo.jb.hw.sdcli.programs.Cat
+import ru.ifmo.jb.hw.sdcli.programs.Pwd
+import ru.ifmo.jb.hw.sdcli.programs.Echo
+import ru.ifmo.jb.hw.sdcli.programs.Wc
+import ru.ifmo.jb.hw.sdcli.programs.OuterProgram
 
-object Console {
-    var line = ""
 
-    fun nextChar(): Char {
-        while (line.isEmpty()) {
-            line = readLine() ?: fail()
-            line += '\n'
-        }
-        val c = line.first()
-        line = line.drop(1)
-        return c
-    }
-
-    private fun fail(): Nothing {
-        throw IllegalArgumentException()
-    }
-}
-
+/**
+ * Starting point of a program
+ */
 fun main() {
+    val sc = BushScanner(System.`in`)
+
     while (true) {
-        print("bush$ ")
-        var tokens: List<Token>
+        print("bush$ ") // kek
+
+        // reading the command/pipe of commands
+        var commands: List<List<Token>>
         try {
-            tokens = parse()
+            commands = sc.readCommands()
         } catch (e: IllegalArgumentException) {
             break
         }
-        when (tokens.first()) {
-            "cat" -> {
-                if (tokens.size < 2) {
-                    println("cat: file path required")
-                } else {
-                    Cat(tokens[1]).execute()
-                }
-            }
-            "pwd" -> {
-                Pwd().execute()
-            }
-            "echo" -> {
-                Echo(tokens.drop(1)).execute()
-            }
-            "wc" -> {
-                if (tokens.size < 2) {
-                    println("wc: file path required")
-                } else {
-                    Wc(tokens[1]).execute()
-                }
-            }
-            "exit" -> {
-                Exit().execute()
+
+        // Actual list of Programs to execute
+        val progs: List<Program> = commands.map { c -> listToProgram(c) }
+
+        // checks if we have to do piping
+        if (progs.size > 1) {
+            // Can't stop the while loop inside execute() method of a Program, so have to do this
+            // Real bash doesn't exit if exit is not the last program in pipe. I guess this is not that important
+            if (progs.filterIsInstance<Exit>().isNotEmpty()) {
                 break
             }
-            else -> {
-                println("${tokens.first()}: command not found")
+            // piping
+            for (i in 1 until progs.size) {
+                progs[i-1].linkTo(progs[i])
+            }
+            // execute consistently
+            for (p in progs) {
+                p.execute()
+            }
+            if (progs.filterIsInstance<NoneProgram>().size != progs.size) {
+                println()
+            }
+        } else {
+            progs[0].execute()
+            if (progs[0] is Exit) {
+                break
+            }
+            if (progs[0] !is NoneProgram) {
+                println()
             }
         }
     }
 }
 
-// TODO: doesnt work properly with \n. Ex:
-//  echo "
-//  sds
-//  "
-fun parse(): List<Token> = parseStr().split("\\s+".toRegex())
-
-fun parseStr(head: String = "", c: Char = Console.nextChar()): String {
-    return when (c) {
-        '\n' -> head
-        '\'' -> parseStr(head + parseSingleQuote())
-        '\"' -> parseStr(head + parseDoubleQuote())
-        '$' -> {
-            val res = parseVariable()
-            if (res.length == 1) {
-                return parseStr("$head$", c = res.last())
-            }
-            return parseStr(head + res.dropLast(1), c = res.last())
-        }
-        else -> parseStr(head + c)
+/**
+ * When we split the input into strings of piped programs, they have to be turned into Programs via this method
+ */
+fun listToProgram(tokens: List<Token>): Program {
+    if (tokens.isEmpty()) {
+        return NoneProgram()
     }
-}
-
-fun parseSingleQuote(head: String = "", c: Char = Console.nextChar()): String {
-    return when (c) {
-        '\'' -> head
-        else -> parseSingleQuote(head + c)
+    val prog: Program = when (tokens.first()) {
+        "cat" -> Cat()
+        "pwd" -> Pwd()
+        "echo" -> Echo()
+        "wc" -> Wc()
+        "exit" -> Exit()
+        else -> OuterProgram()
     }
-}
-
-fun parseDoubleQuote(head: String = "", c: Char = Console.nextChar()): String {
-    when (c) {
-        '\"' -> {
-            if (head.isNotEmpty() && head.last() == '\\') {
-                return parseDoubleQuote(head + c)
-            }
-            return head
-        }
-        '$' -> {
-            val res = parseVariable()
-            if (res.length == 1) {
-                return parseDoubleQuote("$head$", c = res.last())
-            }
-            return parseDoubleQuote(head + res.dropLast(1), c = res.last())
-        }
-        else -> return parseDoubleQuote(head + c)
-    }
-}
-
-fun parseVariable(head: String = ""): String {
-    val c = Console.nextChar()
-    return if (c.isLetter() || c == '_') {
-        parseVariable(head + c)
-    } else if (head.isEmpty()) {
-        c.toString()
+    if (prog is OuterProgram) {
+        prog.args = tokens
     } else {
-        System.getenv(head) + c
+        prog.args = tokens.drop(1)
     }
+    return prog
 }

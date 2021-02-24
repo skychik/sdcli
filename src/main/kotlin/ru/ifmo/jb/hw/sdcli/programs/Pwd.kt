@@ -1,7 +1,12 @@
 package ru.ifmo.jb.hw.sdcli.programs
 
-class Pwd : Program {
+import java.io.PrintStream
+/**
+ * Pwd analogue
+ */
+class Pwd : Program() {
     override fun execute() {
-        println(System.getProperty("user.dir"))
+        PrintStream(output).print(System.getProperty("user.dir"))
+        close()
     }
 }

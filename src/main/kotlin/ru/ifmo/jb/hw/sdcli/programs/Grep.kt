@@ -1,8 +1,11 @@
 package ru.ifmo.jb.hw.sdcli.programs
-
-class Grep : Program {
+/**
+ * Grep analogue
+ */
+class Grep : Program() {
     override fun execute() {
 
+        close()
     }
 
 }
