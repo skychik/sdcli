@@ -8,7 +8,7 @@ import java.io.PrintStream
 /**
  * Wc analogue
  */
-class Wc : Program() {
+class WcProgram : Program() {
     override fun execute() {
         if (args.isEmpty()) {
             val bytes = input.readAllBytes()

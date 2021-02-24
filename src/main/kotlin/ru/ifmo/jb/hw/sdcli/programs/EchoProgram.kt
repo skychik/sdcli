@@ -7,7 +7,7 @@ import java.io.PrintStream
 /**
  * Echo analogue
  */
-class Echo : Program() {
+class EchoProgram : Program() {
     override fun execute() {
         val ps = PrintStream(output)
         for (arg in args) {

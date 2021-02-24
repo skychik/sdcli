@@ -1,13 +1,13 @@
 @file:JvmName("Main")
 package ru.ifmo.jb.hw.sdcli
 
-import ru.ifmo.jb.hw.sdcli.programs.Exit
+import ru.ifmo.jb.hw.sdcli.programs.ExitProgram
 import ru.ifmo.jb.hw.sdcli.programs.NoneProgram
 import ru.ifmo.jb.hw.sdcli.programs.Program
-import ru.ifmo.jb.hw.sdcli.programs.Cat
-import ru.ifmo.jb.hw.sdcli.programs.Pwd
-import ru.ifmo.jb.hw.sdcli.programs.Echo
-import ru.ifmo.jb.hw.sdcli.programs.Wc
+import ru.ifmo.jb.hw.sdcli.programs.CatProgram
+import ru.ifmo.jb.hw.sdcli.programs.PwdProgram
+import ru.ifmo.jb.hw.sdcli.programs.EchoProgram
+import ru.ifmo.jb.hw.sdcli.programs.WcProgram
 import ru.ifmo.jb.hw.sdcli.programs.OuterProgram
 
 
@@ -35,7 +35,7 @@ fun main() {
         if (progs.size > 1) {
             // Can't stop the while loop inside execute() method of a Program, so have to do this
             // Real bash doesn't exit if exit is not the last program in pipe. I guess this is not that important
-            if (progs.filterIsInstance<Exit>().isNotEmpty()) {
+            if (progs.filterIsInstance<ExitProgram>().isNotEmpty()) {
                 break
             }
             // piping
@@ -51,7 +51,7 @@ fun main() {
             }
         } else {
             progs[0].execute()
-            if (progs[0] is Exit) {
+            if (progs[0] is ExitProgram) {
                 break
             }
             if (progs[0] !is NoneProgram) {
@@ -69,11 +69,11 @@ fun listToProgram(tokens: List<Token>): Program {
         return NoneProgram()
     }
     val prog: Program = when (tokens.first()) {
-        "cat" -> Cat()
-        "pwd" -> Pwd()
-        "echo" -> Echo()
-        "wc" -> Wc()
-        "exit" -> Exit()
+        "cat" -> CatProgram()
+        "pwd" -> PwdProgram()
+        "echo" -> EchoProgram()
+        "wc" -> WcProgram()
+        "exit" -> ExitProgram()
         else -> OuterProgram()
     }
     if (prog is OuterProgram) {

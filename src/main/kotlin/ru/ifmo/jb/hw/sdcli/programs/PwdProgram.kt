@@ -1,13 +1,12 @@
 package ru.ifmo.jb.hw.sdcli.programs
 
 import java.io.PrintStream
-
 /**
- * Exit analogue.
+ * Pwd analogue
  */
-class Exit : Program() {
+class PwdProgram : Program() {
     override fun execute() {
-        PrintStream(output).print("exit")
+        PrintStream(output).print(System.getProperty("user.dir"))
         close()
     }
 }

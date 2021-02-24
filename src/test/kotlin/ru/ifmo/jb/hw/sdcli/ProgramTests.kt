@@ -2,9 +2,8 @@ package ru.ifmo.jb.hw.sdcli
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import ru.ifmo.jb.hw.sdcli.programs.Cat
-import ru.ifmo.jb.hw.sdcli.programs.Echo
-import ru.ifmo.jb.hw.sdcli.programs.Program
+import ru.ifmo.jb.hw.sdcli.programs.CatProgram
+import ru.ifmo.jb.hw.sdcli.programs.EchoProgram
 import java.io.File
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -56,7 +55,7 @@ class ProgramTests {
 
     @Test
     fun catWithArgsTest() {
-        val cat = Cat()
+        val cat = CatProgram()
         cat.args = listOf(fileName)
         cat.execute()
         assertEquals(file.readText(), outContent.toString())
@@ -64,16 +63,16 @@ class ProgramTests {
 
     @Test
     fun catWithoutArgsTest() {
-        val echo = Echo()
+        val echo = EchoProgram()
         echo.args = args
-        val cat = Cat()
+        val cat = CatProgram()
         echo.linkTo(cat)
         echo.execute()
         cat.execute()
         val res1 = outContent.toString()
 
         outContent.reset()
-        val echo2 = Echo()
+        val echo2 = EchoProgram()
         echo2.args = args
         echo2.execute()
         val res2 = outContent.toString()

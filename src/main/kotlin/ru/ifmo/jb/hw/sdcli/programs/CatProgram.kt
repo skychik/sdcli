@@ -7,7 +7,7 @@ import java.io.InputStream
 /**
  * Cat analogue
  */
-class Cat : Program() {
+class CatProgram : Program() {
 
     override fun execute() {
         if (args.isEmpty()) {
