@@ -9,30 +9,43 @@ import java.io.PrintStream
  * Wc analogue
  */
 class WcProgram : Program() {
-    override fun execute() {
+    override fun executeImpl() {
         if (args.isEmpty()) {
             val bytes = input.readAllBytes()
-            PrintStream(output).print(fromStrToAnswer(bytes.toString(), bytes))
-            close()
-        } else {
+            PrintStream(output).print(format(fromDataToCounts(bytes.toString(), bytes)))
+            return
+        }
+        var total = Triple(0, 0, 0)
+        val ps = PrintStream(output)
+        var didPrint = false
+        for (fileName in args) {
             try {
-                val inputStream = File(args[0]).inputStream()
+                val inputStream = File(fileName).inputStream()
                 val str = inputStream.bufferedReader().use { it.readText() }
-                val bytes = File(args[0]).readBytes()
-                print(fromStrToAnswer(str, bytes) + args[0])
+                val bytes = File(fileName).readBytes()
+                val res = fromDataToCounts(str, bytes)
+                total = Triple(total.first + res.first, total.second + res.second, total.third + res.third)
+                if (didPrint) ps.println() else didPrint = true
+                ps.print(format(res) + " $fileName")
             } catch (e: FileNotFoundException) {
-                print("cat: ${args[0]}: open: No such file or directory")
-            } finally {
-                close()
+                if (didPrint) ps.println() else didPrint = true
+                ps.print("wc: $fileName: open: No such file or directory")
             }
+        }
+        if (args.size > 1) {
+            ps.println()
+            ps.print(format(total) + " total")
         }
     }
 
-    private fun fromStrToAnswer(str: String, bytes: ByteArray): String {
+    private fun fromDataToCounts(str: String, bytes: ByteArray): Triple<Int, Int, Int> {
         val lines = (str.split("\n").size - 1)
         val words = (str.replace("\n", " ").split("\\s+".toRegex()).size - 1)
+        return Triple(lines, words, bytes.size)
+    }
 
+    private fun format(triple: Triple<Int, Int, Int>): String {
         val format = {num: Int -> "%7d".format(num)}
-        return " ${format(lines)} ${format(words)} ${format(bytes.size)}"
+        return " ${format(triple.first)} ${format(triple.second)} ${format(triple.third)}"
     }
 }

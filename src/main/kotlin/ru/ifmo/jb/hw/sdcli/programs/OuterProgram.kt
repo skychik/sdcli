@@ -7,7 +7,7 @@ import java.io.PrintStream
  * Any other real bash program is called via this class
  */
 class OuterProgram : Program() {
-    override fun execute() {
+    override fun executeImpl() {
         try {
             val pb = ProcessBuilder()
             pb.inheritIO()
@@ -19,8 +19,6 @@ class OuterProgram : Program() {
             process.waitFor()
         } catch (e: IOException) {
             PrintStream(output).print("bush: ${args[0]}: command not found")
-        } finally {
-            close()
         }
     }
 }

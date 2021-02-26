@@ -1,14 +1,7 @@
 @file:JvmName("Main")
 package ru.ifmo.jb.hw.sdcli
 
-import ru.ifmo.jb.hw.sdcli.programs.ExitProgram
-import ru.ifmo.jb.hw.sdcli.programs.NoneProgram
-import ru.ifmo.jb.hw.sdcli.programs.Program
-import ru.ifmo.jb.hw.sdcli.programs.CatProgram
-import ru.ifmo.jb.hw.sdcli.programs.PwdProgram
-import ru.ifmo.jb.hw.sdcli.programs.EchoProgram
-import ru.ifmo.jb.hw.sdcli.programs.WcProgram
-import ru.ifmo.jb.hw.sdcli.programs.OuterProgram
+import ru.ifmo.jb.hw.sdcli.programs.*
 
 
 /**
@@ -24,7 +17,7 @@ fun main() {
         var commands: List<List<Token>>
         try {
             commands = sc.readCommands()
-        } catch (e: IllegalArgumentException) {
+        } catch (e: NoSuchElementException) {
             break
         }
 
@@ -74,6 +67,7 @@ fun listToProgram(tokens: List<Token>): Program {
         "echo" -> EchoProgram()
         "wc" -> WcProgram()
         "exit" -> ExitProgram()
+        "grep" -> GrepProgram()
         else -> OuterProgram()
     }
     if (prog is OuterProgram) {

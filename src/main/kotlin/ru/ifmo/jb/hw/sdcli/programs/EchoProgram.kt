@@ -8,11 +8,12 @@ import java.io.PrintStream
  * Echo analogue
  */
 class EchoProgram : Program() {
-    override fun execute() {
+    override fun executeImpl() {
         val ps = PrintStream(output)
+        var didPrint = false
         for (arg in args) {
-            ps.print("$arg ")
+            if (didPrint) ps.print(" ") else didPrint = true
+            ps.print(arg)
         }
-        close()
     }
 }

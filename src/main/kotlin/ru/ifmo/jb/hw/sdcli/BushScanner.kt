@@ -1,5 +1,6 @@
 package ru.ifmo.jb.hw.sdcli
 
+import java.io.Closeable
 import java.io.InputStream
 import java.util.Scanner
 
@@ -9,22 +10,19 @@ import java.util.Scanner
  * Has parsing methods to separate commands and their arguments while piping.
  * Works fine with single quote and double quote separation, and also with inlining of variables
  */
-class BushScanner(inputStream: InputStream) {
-    private val sc = Scanner(inputStream)
+// TODO: maybe need to use StringBuilder
+class BushScanner(private val inputStream: InputStream) : Closeable {
+    private var sc = Scanner(inputStream) // TODO: should close it?
     private var line = ""
 
     fun nextChar(): Char {
         while (line.isEmpty()) {
-            line = sc.nextLine() ?: fail()
+            line = sc.nextLine()
             line += '\n'
         }
         val c = line.first()
         line = line.drop(1)
         return c
-    }
-
-    private fun fail(): Nothing {
-        throw IllegalArgumentException("Exception while reading new line. Might occur because of ^D")
     }
 
     // TODO: doesnt work properly with \n. Ex:
@@ -77,6 +75,7 @@ class BushScanner(inputStream: InputStream) {
                 readCommands(cmnds)
             }
             else -> {
+                // TODO: maybe use Scanner.useDelimiter()
                 cmnds.appendToken("$c")
                 readCommands(cmnds)
             }
@@ -132,33 +131,35 @@ class BushScanner(inputStream: InputStream) {
         }
     }
 
+    override fun close() {
+        sc.close()
+    }
+
+
     /**
-     * Simply split the string into words by spaces
+     * helpers
      */
-//    private fun tokenize(str: String): List<Token> = str.split("\\s+".toRegex())
-}
 
-/**
- * Remove empty string at the end of the list of tokens of current command
- */
-fun MutableList<MutableList<Token>>.removeLastEmptyToken() {
-    if (this.last().isNotEmpty() && this.last().last() == "") {
-        this.last().removeAt(this.last().size - 1)
+    private fun MutableList<MutableList<Token>>.removeLastEmptyToken() {
+        if (this.last().isNotEmpty() && this.last().last() == "") {
+            this.last().removeAt(this.last().size - 1)
+        }
     }
-}
 
-fun MutableList<MutableList<Token>>.addNewCommand() {
-    if (this.last().isEmpty()) {
-        this.removeAt(this.size - 1)
+    private fun MutableList<MutableList<Token>>.addNewCommand() {
+        if (this.last().isEmpty()) {
+            this.removeAt(this.size - 1)
+        }
+        this.add(mutableListOf(""))
     }
-    this.add(mutableListOf(""))
-}
 
-fun MutableList<MutableList<Token>>.addToken(token: Token) {
-    this.removeLastEmptyToken()
-    this.last().add(token)
-}
+    private fun MutableList<MutableList<Token>>.addToken(token: Token) {
+        this.removeLastEmptyToken()
+        this.last().add(token)
+    }
 
-fun MutableList<MutableList<Token>>.appendToken(str: String) {
-    this.last()[this.last().size - 1] += str
+    private fun MutableList<MutableList<Token>>.appendToken(str: String) {
+        this.last()[this.last().size - 1] += str
+    }
+
 }

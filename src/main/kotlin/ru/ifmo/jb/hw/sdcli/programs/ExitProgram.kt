@@ -6,8 +6,7 @@ import java.io.PrintStream
  * Exit analogue.
  */
 class ExitProgram : Program() {
-    override fun execute() {
+    override fun executeImpl() {
         PrintStream(output).print("exit")
-        close()
     }
 }
