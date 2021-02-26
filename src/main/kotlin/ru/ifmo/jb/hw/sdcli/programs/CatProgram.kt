@@ -1,10 +1,10 @@
 package ru.ifmo.jb.hw.sdcli.programs
 
-import java.io.*
-
-import java.io.BufferedReader
-import java.util.*
-
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.InputStream
+import java.io.PrintStream
+import java.util.Scanner
 
 /**
  * Cat analogue

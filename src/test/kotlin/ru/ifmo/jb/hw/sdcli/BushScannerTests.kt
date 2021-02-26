@@ -8,7 +8,7 @@ import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.io.PrintStream
 
-class ParsingTests {
+class BushScannerTests {
     lateinit var input: PipedInputStream
     lateinit var sc: BushScanner
     lateinit var console: PrintStream

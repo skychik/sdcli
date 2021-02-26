@@ -3,13 +3,17 @@ package ru.ifmo.jb.hw.sdcli.programs
 import java.io.File
 import java.io.PrintStream
 import java.lang.NumberFormatException
-import java.util.*
+import java.util.Scanner
 
 /**
  * Grep analogue
  */
 class GrepProgram : Program() {
     private var didPrintAnything = false
+    private var isCaseSensitive = true
+    private var isFindingWholeWord = false
+    private var linesCountAfterFounded = 0
+    private var nextArgsIndex = 0
 
     override fun executeImpl() {
         // no args
@@ -18,25 +22,9 @@ class GrepProgram : Program() {
             return
         }
 
-        // parse options
-        var isCaseSensitive = true
-        var isFindingWholeWord = false
-        var linesCountAfterFounded = 0
-        var nextArgsIndex = 0
+        // parsing
         try {
-            while (nextArgsIndex < args.size - 1) {
-                val arg = args[nextArgsIndex]
-                if (arg == "--") {
-                    nextArgsIndex++
-                    break
-                }
-                else if (arg.startsWith("-A")) linesCountAfterFounded = arg.drop(2).toInt()
-                else if (arg.startsWith("--after-context=")) linesCountAfterFounded = arg.drop(16).toInt()
-                else if (arg == "-i" || arg == "--ignore-case") isCaseSensitive = false
-                else if (arg == "-w" || arg == "--word-regexp") isFindingWholeWord = true
-                else break
-                nextArgsIndex++
-            }
+            parseArgs()
         } catch (e: NumberFormatException) {
             PrintStream(output).print("grep: Invalid argument")
             return
@@ -47,12 +35,13 @@ class GrepProgram : Program() {
             printUsage()
             return
         }
+
         val pattern = args[nextArgsIndex]
         nextArgsIndex++
 
         // if no file name provided
         if (nextArgsIndex == args.size) {
-
+            // not supported
             return
         }
 
@@ -60,21 +49,39 @@ class GrepProgram : Program() {
 
         // if one file name provided
         if (nextArgsIndex == args.size - 1) {
-            grep(args[nextArgsIndex], pattern, isCaseSensitive, isFindingWholeWord, linesCountAfterFounded)
+            grep(args[nextArgsIndex], pattern)
             return
         }
-
         // for each file name
         for (i in nextArgsIndex until args.size) {
-            grep(args[i], pattern, isCaseSensitive, isFindingWholeWord, linesCountAfterFounded, addPrefix = true)
+            grep(args[i], pattern, addPrefix = true)
+        }
+    }
+
+    private fun parseArgs() {
+        while (nextArgsIndex < args.size - 1) {
+            val arg = args[nextArgsIndex]
+            if (arg == "--") {
+                nextArgsIndex++
+                break
+            }
+            else if (arg == "-A") {
+                nextArgsIndex++
+                linesCountAfterFounded = args[nextArgsIndex].toInt()
+            }
+            else if (arg.startsWith("-A"))
+                linesCountAfterFounded = arg.drop("-A".length).toInt()
+            else if (arg.startsWith("--after-context="))
+                linesCountAfterFounded = arg.drop("--after-context=".length).toInt()
+            else if (arg == "-i" || arg == "--ignore-case") isCaseSensitive = false
+            else if (arg == "-w" || arg == "--word-regexp") isFindingWholeWord = true
+            else break
+            nextArgsIndex++
         }
     }
 
     private fun grep(fileName: String,
                      pattern: String,
-                     isCaseSensitive: Boolean,
-                     isFindingWholeWord: Boolean,
-                     linesCountAfterFounded: Int,
                      addPrefix: Boolean = false) {
         val prefix = if (addPrefix) fileName else ""
         val regexString = if (isFindingWholeWord) "\\b${pattern}\\b" else pattern
@@ -91,7 +98,11 @@ class GrepProgram : Program() {
                     ps.print("--")
                 }
                 if (didPrintAnything) ps.println() else didPrintAnything = true
-                ps.print("$prefix:$line")
+                var sep = ""
+                if (addPrefix) {
+                    sep = ":"
+                }
+                ps.print("$prefix$sep$line")
                 var linesPrinted = 0
                 while (linesPrinted < linesCountAfterFounded) {
                     if (!sc.hasNext()) break
@@ -99,11 +110,10 @@ class GrepProgram : Program() {
                     linesPrinted++
                     if (didPrintAnything) ps.println()
                     line = sc.nextLine()
-                    var sep = "-"
-                    if (line.contains(regex)) {
-                        sep = ":"
-                        linesPrinted = 0
-                    }
+                    if (line.contains(regex)) linesPrinted = 0
+                    sep = if (addPrefix) {
+                        if (line.contains(regex)) ":" else "-"
+                    } else ""
                     ps.print(prefix + sep + line)
                 }
             }

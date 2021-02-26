@@ -14,8 +14,9 @@ import java.io.ByteArrayOutputStream
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProgramTests {
     var files = mutableMapOf<String, File>()
-    val smallFileName = "src/test/resources/test_data_created.txt"
-    val bigFileName = "src/test/resources/test_data.txt"
+    val resourcesPath = "src/test/resources/"
+    val smallFileName = "${resourcesPath}test_data_created.txt"
+    val bigFileName = "${resourcesPath}test_data.txt"
 
     val data = "sdfsdfhgsarweyhdgf54tgf\ndd"
     val args = listOf("dd", "dfdf  \"f   \$USER ", "dfdf  f ")
@@ -94,21 +95,21 @@ class ProgramTests {
     }
 
     @Test
-    fun wcWithArgsTest() {
-        // single file
+    fun wcWithArgsTestSingleFile() {
         val wc = WcProgram()
         wc.args = listOf(bigFileName)
         wc.execute()
         assertEquals("     185     781    5766 $bigFileName", outContent.toString())
+    }
 
-        // multiple files
-        outContent.reset()
-        val wc2 = WcProgram()
+    @Test
+    fun wcWithArgsTestMultipleFiles() {
+        val wc = WcProgram()
         val wcArgs = files.keys.toMutableList()
-        val notExistingFileName = "src/test/resources/test_data_cccdfdsfsfsdfsf"
+        val notExistingFileName = "${resourcesPath}test_data_cccdfdsfsfsdfsf"
         wcArgs.add(notExistingFileName)
-        wc2.args = wcArgs.sorted()
-        wc2.execute()
+        wc.args = wcArgs.sorted()
+        wc.execute()
         val expected =
             "     185     781    5766 $bigFileName\n" +
             "wc: $notExistingFileName: open: No such file or directory\n" +
@@ -118,9 +119,36 @@ class ProgramTests {
     }
 
     @Test
-    fun grepTest() {
+    fun grepTestNoArgs() {
         val grep = GrepProgram()
         grep.execute()
-        assertEquals(System.getProperty("user.dir"), outContent.toString())
+        assertEquals("usage: grep [-iw] [-A num] [pattern] [file ...]", outContent.toString())
+    }
+
+    @Test
+    fun grepTestWithArgsAndFileNames() {
+        val argsAndExpected = listOf(
+            Pair(listOf("RG", bigFileName), "grep_simple_expected.txt"),
+            Pair(listOf("-A2", "if", bigFileName), "grep_A2_expected.txt"),
+            Pair(listOf("-A223", "-A2", "if", bigFileName), "grep_A2_expected.txt"),
+            Pair(listOf("-A", "2", "if", bigFileName), "grep_A2_expected.txt"),
+            Pair(listOf("--after-context=2", "if", bigFileName), "grep_A2_expected.txt"),
+            Pair(listOf("-A2", "-w", "if", bigFileName), "grep_A2_w_expected.txt"),
+            Pair(listOf("-w", "-A2", "if", bigFileName), "grep_A2_w_expected.txt"),
+            Pair(listOf("--word-regexp", "-A2", "if", bigFileName), "grep_A2_w_expected.txt"),
+            Pair(listOf( "-i", "-A1", "RG", bigFileName), "grep_A1_i_expected.txt"),
+            Pair(listOf("-A1", "-i", "RG", bigFileName), "grep_A1_i_expected.txt"),
+            Pair(listOf("-A1", "--ignore-case", "RG", bigFileName), "grep_A1_i_expected.txt"),
+            Pair(listOf("-A1", "--ignore-case", "-i", "RG", bigFileName), "grep_A1_i_expected.txt"),
+        )
+
+        for (pair in argsAndExpected) {
+            val grep = GrepProgram()
+            grep.args = pair.first
+            grep.execute()
+            assertEquals(File("${resourcesPath}${pair.second}").readText(), outContent.toString(),
+                "Failed on args: ${pair.first}")
+            outContent.reset()
+        }
     }
 }
