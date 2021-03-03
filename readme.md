@@ -4,7 +4,18 @@
 
 `bash$ ./gradlew`
 
-### Структура классов
+
+## Описание реализации
+
+### Алгоритм
+
+![main_algorithm.png](readme_images/main_algorithm.png)
+
+### Алгоритм работы BushScanner
+
+![bush_scanner_algorithm.png](readme_images/bush_scanner_algorithm.png)
+
+## Структура классов
 
 ```
 ru.ifmo.jb.hw.sdcli
@@ -19,6 +30,10 @@ ru.ifmo.jb.hw.sdcli
     │   NoneProgram - useful stub
 ```
 
-## Описание реализации
+### Program и его наследники
 
-Попытка приблизиться к тому, как работает в bash. 
+![program_inheritance.png](readme_images/program_inheritance.png)
+
+### Что есть Token?
+
+![token.png](readme_images/token.png)

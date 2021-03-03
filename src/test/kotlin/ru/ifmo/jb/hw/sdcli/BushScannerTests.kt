@@ -1,7 +1,6 @@
 package ru.ifmo.jb.hw.sdcli
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.PipedInputStream
@@ -27,22 +26,22 @@ class BushScannerTests {
     fun testSingleCommand() {
         for (i in 1..3) {
             console.println(cmnd)
-            assertEquals(listOf(cmndResult), sc.readCommands())
+            assertEquals(listOf(cmndResult), sc.readCommands2())
         }
     }
 
     @Test
     fun testPiping() {
         console.println("$cmnd|cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
         console.println("$cmnd |cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
         console.println("$cmnd| cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
         console.println("$cmnd | cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
 
         console.println("$cmnd|$cmnd")
-        assertEquals(listOf(cmndResult, cmndResult), sc.readCommands())
+        assertEquals(listOf(cmndResult, cmndResult), sc.readCommands2())
     }
 }

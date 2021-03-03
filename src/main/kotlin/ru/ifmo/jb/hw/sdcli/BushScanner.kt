@@ -1,8 +1,9 @@
 package ru.ifmo.jb.hw.sdcli
 
-import java.io.Closeable
 import java.io.InputStream
+import java.lang.StringBuilder
 import java.util.Scanner
+import kotlin.collections.ArrayDeque
 
 /**
  * Used instead of Scanner, because we can't simply read until the end of line,
@@ -11,19 +12,71 @@ import java.util.Scanner
  * Works fine with single quote and double quote separation, and also with inlining of variables
  */
 // TODO: maybe need to use StringBuilder
-class BushScanner(private val inputStream: InputStream) : Closeable {
+class BushScanner(inputStream: InputStream) {
     private var sc = Scanner(inputStream) // TODO: should close it?
-    private var line = ""
+    private var line: MutableList<Char> = ArrayDeque()
+    private val vars: MutableMap<String, String> = mutableMapOf()
 
-    fun nextChar(): Char {
-        while (line.isEmpty()) {
-            line = sc.nextLine()
-            line += '\n'
+    /**
+     * BushScanner takes char by char with this method
+     */
+    private fun nextChar(): Char {
+        if (line.isEmpty()) {
+            line.addAll(sc.nextLine().asSequence())
+            line.add('\n')
         }
         val c = line.first()
-        line = line.drop(1)
+        line.removeFirst()
         return c
     }
+
+    /**
+     * The only public method. Returns List of tokens of piped commands.
+     * @return all tokens without variables
+     */
+    fun readCommands(): List<List<Token>> {
+        val commands: MutableList<MutableList<Token>> = readTokens()
+        val vars = mutableListOf<Pair<String, String>>()
+        var isOnlyVariables = commands.size == 1
+        for (tokens in commands) {
+            for (token in tokens) {
+                val variable = parseVarAssignment(token)
+                if (variable == null) {
+                    isOnlyVariables = false
+                    break
+                }
+                tokens.removeFirst()
+                if (isOnlyVariables) {
+                    vars.add(variable)
+                }
+            }
+        }
+        if (isOnlyVariables) {
+            for (p in vars) {
+                this.vars[p.first] = p.second
+            }
+        }
+        return commands
+    }
+
+    private fun parseVarAssignment(token: Token): Pair<String, String>? {
+        if (token[0] == '=' || !token.contains('=')) {
+            return null
+        }
+        val sb = StringBuilder()
+        var name = ""
+        for (c in token) {
+            if (c == '=') {
+                name = sb.toString()
+                sb.clear()
+                continue
+            } else {
+                sb.append(c)
+            }
+        }
+        return Pair(name, sb.toString())
+    }
+
 
     // TODO: doesnt work properly with \n. Ex:
     //  echo "
@@ -35,10 +88,10 @@ class BushScanner(private val inputStream: InputStream) : Closeable {
      * @param cmnds - is a list of piped programs to return: if there was no piping - only one string in list returned
      * @param c - to read a char from Console object. But we also can pass a previous character here
      */
-    fun readCommands(
+    private fun readTokens(
         cmnds: MutableList<MutableList<Token>> = mutableListOf(mutableListOf("")),
         c: Char = this.nextChar()
-    ): List<List<Token>> {
+    ): MutableList<MutableList<Token>> {
         return when (c) {
             '\n' -> {
                 cmnds.removeLastEmptyToken()
@@ -46,17 +99,17 @@ class BushScanner(private val inputStream: InputStream) : Closeable {
             }
             '\'' -> {
                 cmnds.addToken(readSingleQuoteString())
-                readCommands(cmnds)
+                readTokens(cmnds)
             }
             '\"' -> {
                 cmnds.addToken(readDoubleQuoteString())
-                readCommands(cmnds)
+                readTokens(cmnds)
             }
             '|' -> {
                 // TODO: обрабатывать подряд идущие |
                 cmnds.removeLastEmptyToken()
                 cmnds.addNewCommand()
-                readCommands(cmnds)
+                readTokens(cmnds)
             }
             '$' -> {
                 val variable = readVariable()
@@ -67,17 +120,17 @@ class BushScanner(private val inputStream: InputStream) : Closeable {
                 } else {
                     cmnds.appendToken("$")
                 }
-                readCommands(cmnds, c = variable.last())
+                readTokens(cmnds, c = variable.last())
             }
             ' ' -> {
                 cmnds.removeLastEmptyToken()
                 cmnds.addToken("")
-                readCommands(cmnds)
+                readTokens(cmnds)
             }
             else -> {
                 // TODO: maybe use Scanner.useDelimiter()
                 cmnds.appendToken("$c")
-                readCommands(cmnds)
+                readTokens(cmnds)
             }
         }
     }
@@ -85,7 +138,7 @@ class BushScanner(private val inputStream: InputStream) : Closeable {
     /**
      * Is called to parse single quoted expressions
      */
-    fun readSingleQuoteString(head: String = "", c: Char = this.nextChar()): String {
+    private fun readSingleQuoteString(head: String = "", c: Char = this.nextChar()): String {
         return when (c) {
             '\'' -> head
             else -> readSingleQuoteString(head + c)
@@ -95,7 +148,7 @@ class BushScanner(private val inputStream: InputStream) : Closeable {
     /**
      * Is called to parse double quoted expressions
      */
-    fun readDoubleQuoteString(head: String = "", c: Char = this.nextChar()): String {
+    private fun readDoubleQuoteString(head: String = "", c: Char = this.nextChar()): String {
         return when (c) {
             // TODO: экранирование
             '\"' -> {
@@ -119,22 +172,21 @@ class BushScanner(private val inputStream: InputStream) : Closeable {
      * Is called to parse variable, started with "$" character.
      * When the full name of a variable was read, calling "System.getenv"
      */
-    fun readVariable(head: String = ""): String {
+    private fun readVariable(head: String = ""): String {
         val c = this.nextChar()
         return if (c.isLetter() || c == '_') {
             readVariable(head + c)
         } else if (head.isEmpty()) {
             c.toString()
         } else {
-            // TODO: catch exceptions
-            System.getenv(head) + c
+            if (vars.containsKey(head)) {
+                vars[head] + c
+            } else {
+                // TODO: catch exceptions
+                System.getenv(head) ?: "" + c
+            }
         }
     }
-
-    override fun close() {
-        sc.close()
-    }
-
 
     /**
      * helpers

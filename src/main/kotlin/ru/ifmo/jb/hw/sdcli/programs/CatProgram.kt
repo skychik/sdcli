@@ -11,9 +11,9 @@ import java.util.Scanner
  */
 class CatProgram : Program() {
     override fun executeImpl() {
+        val printer = PrintStream(output)
         if (args.isEmpty()) {
             // TODO: breaks the System.in
-            val printer = PrintStream(output)
             val sc = Scanner(input)
             while (sc.hasNext()) {
                 printer.println(sc.nextLine())
@@ -23,9 +23,9 @@ class CatProgram : Program() {
         try {
             val inputStream: InputStream = File(args[0]).inputStream()
             val inputString = inputStream.bufferedReader().use { it.readText() }
-            print(inputString)
+            printer.print(inputString)
         } catch (e: FileNotFoundException) {
-            print("cat: ${args[0]}: No such file or directory")
+            printer.print("cat: ${args[0]}: No such file or directory")
         }
     }
 }
