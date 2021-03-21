@@ -22,7 +22,11 @@ class CdProgram : Program() {
     }
 
     override fun executeImpl() {
-        if (args.isNotEmpty() && args.first() == "..") {
+        if (args.isNotEmpty() && args.first().startsWith("..")) {
+            if (args.first() != ("..")) {
+                PrintStream(output).print("cd: " + "Invalid location provided")
+                return
+            }
             val currDir = Paths.get(System.getProperty(pwdProperty)).toAbsolutePath().toFile()
             System.setProperty(pwdProperty, currDir.parent)
             return
