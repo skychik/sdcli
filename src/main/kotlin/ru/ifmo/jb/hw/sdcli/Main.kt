@@ -2,7 +2,6 @@
 package ru.ifmo.jb.hw.sdcli
 
 import ru.ifmo.jb.hw.sdcli.programs.*
-import java.lang.StringBuilder
 
 
 /**
@@ -12,7 +11,7 @@ fun main() {
     val sc = BushScanner(System.`in`)
 
     while (true) {
-        print("bush$ ") // kek
+        print("bush$ " + CdProgram.getCurrentDir() + ":") // kek
 
         // reading the command/pipe of commands
         var commands: List<List<Token>>
@@ -69,6 +68,8 @@ fun listToProgram(tokens: List<Token>): Program {
         "wc" -> WcProgram()
         "exit" -> ExitProgram()
         "grep" -> GrepProgram()
+        "ls" -> LsProgram()
+        "cd" -> CdProgram()
         else -> OuterProgram()
     }
     if (prog is OuterProgram) {

@@ -1,16 +1,17 @@
 package ru.ifmo.jb.hw.sdcli
 
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import ru.ifmo.jb.hw.sdcli.programs.*
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
 
-import java.io.ByteArrayOutputStream
 
-
-
-// many fails 
+// many fail
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProgramTests {
     var files = mutableMapOf<String, File>()
