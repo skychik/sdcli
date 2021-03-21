@@ -2,6 +2,7 @@ package ru.ifmo.jb.hw.sdcli
 
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -9,6 +10,7 @@ import ru.ifmo.jb.hw.sdcli.programs.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
+import java.nio.file.Paths
 
 
 // many fail
@@ -40,6 +42,49 @@ class ProgramTests {
     @AfterAll
     fun end() {
         System.setOut(originalOut)
+    }
+
+    @Test
+    fun lsTest() {
+        val lsProgram = LsProgram()
+        lsProgram.args = emptyList()
+        lsProgram.execute()
+        assertTrue(outContent.toString().isNotEmpty())
+        assertEquals( 4, outContent.toString().split(System.lineSeparator())
+            .count { it.endsWith(File.separator) })
+
+        outContent.reset()
+        lsProgram.args = listOf("gradle")
+        lsProgram.execute()
+        assertTrue(outContent.toString().isNotEmpty())
+        assertEquals("wrapper" + File.separator + System.lineSeparator(), outContent.toString())
+    }
+
+    @Test
+    fun cdTest() {
+        val cdProgram = CdProgram()
+        cdProgram.args = listOf("..")
+        var etalon = Paths.get(System.getProperty("user.dir")).parent
+        cdProgram.execute()
+        assertTrue(outContent.toString().isEmpty())
+        assertEquals(etalon.toString(), System.getProperty("user.dir"))
+
+        val sysSeparator = File.separator
+        etalon = Paths.get(etalon.toAbsolutePath().toString() + sysSeparator + "sdcli" + sysSeparator + "gradle")
+        cdProgram.args = listOf("sdcli" + sysSeparator + "gradle")
+        cdProgram.execute()
+        assertTrue(outContent.toString().isEmpty())
+        assertEquals(etalon.toString(), System.getProperty("user.dir"))
+
+
+        cdProgram.args = emptyList()
+        cdProgram.execute()
+        assertTrue(outContent.toString().isEmpty())
+        assertEquals(System.getProperty("user.home"), System.getProperty("user.dir"))
+
+
+
+//        cdProgram.args =
     }
 
     @Test

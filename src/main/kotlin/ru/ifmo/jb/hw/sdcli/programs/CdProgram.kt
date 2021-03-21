@@ -46,11 +46,21 @@ class CdProgram : Program() {
 
             if (parsedArgs.exists() && parsedArgs.isDirectory) {
                 val pwd = Paths.get(System.getProperty(pwdProperty)).toAbsolutePath().toFile()
-                if (pwd.walkTopDown().contains(parsedArgs.absoluteFile)) { // valid continue
-                    System.setProperty(pwdProperty, pwd.canonicalPath + sysSeparator + args.first())
-                } else {
-                    throw InvalidPathException(args.first(), "Invalid location provided")
+                var argumentDiskRoot = parsedArgs
+                var newParent = parsedArgs.parentFile
+                while (argumentDiskRoot != newParent && newParent != null) {
+                    argumentDiskRoot = newParent
+                    newParent = newParent.parentFile
                 }
+
+                var pwdDiskRoot = pwd
+                newParent = pwd.parentFile
+                while (pwdDiskRoot != newParent && newParent != null) {
+                    pwdDiskRoot = newParent
+                    newParent = newParent.parentFile
+                }
+
+                System.setProperty(pwdProperty, parsedArgs.absolutePath)
             } else {
                 throw InvalidPathException(args.first(), "Invalid location provided")
             }

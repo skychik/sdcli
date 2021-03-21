@@ -1,5 +1,6 @@
 package ru.ifmo.jb.hw.sdcli.programs
 
+import java.io.File
 import java.io.PrintStream
 import java.nio.file.Paths
 
@@ -16,7 +17,7 @@ class LsProgram : Program() {
             }
             .forEach {
                 if (it.isDirectory) {
-                    ps.println(it.name + "/")
+                    ps.println(it.name + File.separator)
                 } else {
                     ps.println(it.name)
                 }
