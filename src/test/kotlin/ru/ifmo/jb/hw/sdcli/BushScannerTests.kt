@@ -26,22 +26,22 @@ class BushScannerTests {
     fun testSingleCommand() {
         for (i in 1..3) {
             console.println(cmnd)
-            assertEquals(listOf(cmndResult), sc.readCommands2())
+            assertEquals(listOf(cmndResult), sc.readCommands())
         }
     }
 
     @Test
     fun testPiping() {
         console.println("$cmnd|cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
         console.println("$cmnd |cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
         console.println("$cmnd| cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
         console.println("$cmnd | cat")
-        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands2())
+        assertEquals(listOf(cmndResult, listOf("cat")), sc.readCommands())
 
         console.println("$cmnd|$cmnd")
-        assertEquals(listOf(cmndResult, cmndResult), sc.readCommands2())
+        assertEquals(listOf(cmndResult, cmndResult), sc.readCommands())
     }
 }

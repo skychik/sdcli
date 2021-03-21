@@ -10,7 +10,7 @@ import java.io.PrintStream
 class WcProgram : Program() {
     override fun executeImpl() {
         if (args.isEmpty()) {
-            val bytes = input.readAllBytes()
+            val bytes = input.readBytes()
             PrintStream(output).print(format(fromDataToCounts(bytes.toString(), bytes)))
             return
         }
