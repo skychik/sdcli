@@ -9,11 +9,11 @@
 
 ### Алгоритм
 
-![main_algorithm.png](readme_images/main_algorithm.png)
+<img src="readme_images/main_algorithm.png" width="70%">
 
 ### Алгоритм работы BushScanner
 
-![bush_scanner_algorithm.png](readme_images/bush_scanner_algorithm.png)
+<img src="readme_images/bush_scanner_algorithm.png" width="40%">
 
 ## Структура классов
 
@@ -32,8 +32,22 @@ ru.ifmo.jb.hw.sdcli
 
 ### Program и его наследники
 
-![program_inheritance.png](readme_images/program_inheritance.png)
+<img src="readme_images/program_inheritance.png" width="40%">
 
 ### Что есть Token?
 
-![token.png](readme_images/token.png)
+<img src="readme_images/token.png" width="50%">
+
+## UML (ДЗ №4)
+
+### Диаграмма случаев использования
+
+<img src="readme_images/use-case-diagram.png" width="70%">
+
+### Диаграмма компонентов
+
+<img src="readme_images/component-diagram.png" width="70%">
+
+### Диаграммы последовательностей
+
+<img src="readme_images/sequence-diagram.png" width="60%">
