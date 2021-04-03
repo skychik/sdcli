@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.30'
     id 'application'
+    id "io.gitlab.arturbosch.detekt" version "1.16.0-RC2"
 }
 
 group 'ru.ifmo.jb.hw'
@@ -8,6 +9,7 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 mainClassName = "ru.ifmo.jb.hw.sdcli.Main"
@@ -20,4 +22,13 @@ jar {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+run {
+    standardInput = System.in
 }
