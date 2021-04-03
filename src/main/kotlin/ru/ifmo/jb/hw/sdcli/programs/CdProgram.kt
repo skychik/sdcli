@@ -28,6 +28,10 @@ class CdProgram : Program() {
                 return
             }
             val currDir = Paths.get(System.getProperty(pwdProperty)).toAbsolutePath().toFile()
+            if (currDir.parent == null) {
+                PrintStream(output).print("cd: " + "Cannot reach higher level")
+                return
+            }
             System.setProperty(pwdProperty, currDir.parent)
             return
         }
@@ -49,21 +53,6 @@ class CdProgram : Program() {
             }
 
             if (parsedArgs.exists() && parsedArgs.isDirectory) {
-                val pwd = Paths.get(System.getProperty(pwdProperty)).toAbsolutePath().toFile()
-                var argumentDiskRoot = parsedArgs
-                var newParent = parsedArgs.parentFile
-                while (argumentDiskRoot != newParent && newParent != null) {
-                    argumentDiskRoot = newParent
-                    newParent = newParent.parentFile
-                }
-
-                var pwdDiskRoot = pwd
-                newParent = pwd.parentFile
-                while (pwdDiskRoot != newParent && newParent != null) {
-                    pwdDiskRoot = newParent
-                    newParent = newParent.parentFile
-                }
-
                 System.setProperty(pwdProperty, parsedArgs.absolutePath)
             } else {
                 throw InvalidPathException(args.first(), "Invalid location provided")

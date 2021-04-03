@@ -6,7 +6,7 @@ import java.nio.file.Paths
 
 class LsProgram : Program() {
     override fun executeImpl() {
-        val currentDirAsFile = if (args.isEmpty()) Paths.get("").toAbsolutePath().toFile()
+        val currentDirAsFile = if (args.isEmpty()) Paths.get(System.getProperty("user.dir")).toAbsolutePath().toFile()
                     else Paths.get(args.first()).toFile()
 
         val ps = PrintStream(output)
